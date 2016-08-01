@@ -1396,7 +1396,7 @@ exit:
 	return ret;
 }
 
-void rtw_cfg80211_indicate_scan_done(struct adapter *adapter, bool aborted)
+void rtw_cfg80211_indicate_scan_done(struct adapter *adapter, struct cfg80211_scan_info *info)
 {
 	struct rtw_wdev_priv *pwdev_priv = adapter_wdev_data(adapter);
 
@@ -1413,7 +1413,7 @@ void rtw_cfg80211_indicate_scan_done(struct adapter *adapter, bool aborted)
 		}
 		else
 		{
-			cfg80211_scan_done(pwdev_priv->scan_request, aborted);
+			cfg80211_scan_done(pwdev_priv->scan_request, info);
 		}
 
 		pwdev_priv->scan_request = NULL;
@@ -1544,6 +1544,10 @@ static int cfg80211_rtw_scan(struct wiphy *wiphy
 	struct adapter *padapter;
 	struct rtw_wdev_priv *pwdev_priv;
 	struct mlme_priv *pmlmepriv;
+        struct cfg80211_scan_info info = {
+                .aborted = false,
+        };
+
 
 	if (ndev == NULL) {
 		ret = -EINVAL;
@@ -1671,7 +1675,7 @@ check_need_indicate_scan_done:
 	if (true == need_indicate_scan_done)
 	{
 		rtw_cfg80211_surveydone_event_callback(padapter);
-		rtw_cfg80211_indicate_scan_done(padapter, false);
+		rtw_cfg80211_indicate_scan_done(padapter, &info);
 	}
 
 	rtw_ps_deny_cancel(padapter, PS_DENY_SCAN);
@@ -3576,6 +3580,9 @@ void rtw_wdev_unregister(struct wireless_dev *wdev)
 	struct net_device *ndev;
 	struct adapter *adapter;
 	struct rtw_wdev_priv *pwdev_priv;
+        struct cfg80211_scan_info info = {
+                .aborted = true,
+        };
 
 	DBG_8192C("%s(wdev =%p)\n", __func__, wdev);
 
@@ -3588,7 +3595,7 @@ void rtw_wdev_unregister(struct wireless_dev *wdev)
 	adapter = (struct adapter *)rtw_netdev_priv(ndev);
 	pwdev_priv = adapter_wdev_data(adapter);
 
-	rtw_cfg80211_indicate_scan_done(adapter, true);
+	rtw_cfg80211_indicate_scan_done(adapter, &info);
 
 	if (pwdev_priv->pmon_ndev) {
 		DBG_8192C("%s, unregister monitor interface\n", __func__);

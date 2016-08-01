@@ -66,9 +66,9 @@ void rtw_os_indicate_connect(struct adapter *adapter)
 		rtw_signal_process(adapter->pid[2], SIGALRM);
 }
 
-void rtw_os_indicate_scan_done(struct adapter *padapter, bool aborted)
+void rtw_os_indicate_scan_done(struct adapter *padapter, struct cfg80211_scan_info *info)
 {
-	rtw_cfg80211_indicate_scan_done(padapter, aborted);
+	rtw_cfg80211_indicate_scan_done(padapter, info);
 	indicate_wx_scan_complete_event(padapter);
 }
 

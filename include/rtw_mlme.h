@@ -607,7 +607,7 @@ struct wlan_network *_rtw_find_same_network(struct __queue *scanned_queue, struc
 extern void rtw_free_assoc_resources(struct adapter * adapter, int lock_scanned_queue);
 extern void rtw_indicate_disconnect(struct adapter * adapter);
 extern void rtw_indicate_connect(struct adapter * adapter);
-void rtw_indicate_scan_done(struct adapter *padapter, bool aborted);
+void rtw_indicate_scan_done(struct adapter *padapter, struct cfg80211_scan_info *info);
 void rtw_scan_abort(struct adapter *adapter);
 
 extern int rtw_restruct_sec_ie(struct adapter *adapter, u8 *in_ie, u8 *out_ie, uint in_len);

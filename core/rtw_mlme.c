@@ -875,6 +875,9 @@ void rtw_surveydone_event_callback(struct adapter	*adapter, u8 *pbuf)
 {
 	u8 timer_cancelled = false;
 	struct	mlme_priv *pmlmepriv = &(adapter->mlmepriv);
+        struct cfg80211_scan_info info = {
+                .aborted = false,
+        };
 
 	spin_lock_bh(&pmlmepriv->lock);
 	if (pmlmepriv->wps_probe_req_ie) {
@@ -993,7 +996,7 @@ void rtw_surveydone_event_callback(struct adapter	*adapter, u8 *pbuf)
 
 	rtw_cfg80211_surveydone_event_callback(adapter);
 
-	rtw_indicate_scan_done(adapter, false);
+	rtw_indicate_scan_done(adapter, &info);
 }
 
 void rtw_dummy_event_callback(struct adapter *adapter, u8 *pbuf)
@@ -1170,11 +1173,11 @@ void rtw_indicate_disconnect(struct adapter *padapter)
 	rtw_lps_ctrl_wk_cmd(padapter, LPS_CTRL_DISCONNECT, 1);
 }
 
-inline void rtw_indicate_scan_done(struct adapter *padapter, bool aborted)
+inline void rtw_indicate_scan_done(struct adapter *padapter, struct cfg80211_scan_info *info)
 {
 	DBG_871X(FUNC_ADPT_FMT"\n", FUNC_ADPT_ARG(padapter));
 
-	rtw_os_indicate_scan_done(padapter, aborted);
+	rtw_os_indicate_scan_done(padapter, info);
 
 	if (is_primary_adapter(padapter) &&
 	    (!adapter_to_pwrctl(padapter)->bInSuspend) &&
@@ -1193,6 +1196,9 @@ void rtw_scan_abort(struct adapter *adapter)
 	unsigned long start;
 	struct mlme_priv *pmlmepriv = &(adapter->mlmepriv);
 	struct mlme_ext_priv *pmlmeext = &(adapter->mlmeextpriv);
+        struct cfg80211_scan_info info = {
+                .aborted = true,
+        };
 
 	start = jiffies;
 	pmlmeext->scan_abort = true;
@@ -1209,7 +1215,7 @@ void rtw_scan_abort(struct adapter *adapter)
 	if (check_fwstate(pmlmepriv, _FW_UNDER_SURVEY)) {
 		if (!adapter->bDriverStopped && !adapter->bSurpriseRemoved)
 			DBG_871X(FUNC_NDEV_FMT"waiting for scan_abort time out!\n", FUNC_NDEV_ARG(adapter->pnetdev));
-		rtw_indicate_scan_done(adapter, true);
+		rtw_indicate_scan_done(adapter, &info);
 	}
 	pmlmeext->scan_abort = false;
 }
@@ -1881,6 +1887,9 @@ void _rtw_join_timeout_handler (struct adapter *adapter)
 void rtw_scan_timeout_handler (struct adapter *adapter)
 {
 	struct	mlme_priv *pmlmepriv = &adapter->mlmepriv;
+        struct cfg80211_scan_info info = {
+                .aborted = true,
+        };
 
 	DBG_871X(FUNC_ADPT_FMT" fw_state =%x\n", FUNC_ADPT_ARG(adapter), get_fwstate(pmlmepriv));
 
@@ -1890,7 +1899,7 @@ void rtw_scan_timeout_handler (struct adapter *adapter)
 
 	spin_unlock_bh(&pmlmepriv->lock);
 
-	rtw_indicate_scan_done(adapter, true);
+	rtw_indicate_scan_done(adapter, &info);
 }
 
 void rtw_mlme_reset_auto_scan_int(struct adapter *adapter)

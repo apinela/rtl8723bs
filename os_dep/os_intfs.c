@@ -1293,6 +1293,9 @@ void rtw_dev_unload(struct adapter *padapter)
 static int rtw_suspend_free_assoc_resource(struct adapter *padapter)
 {
 	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
+	struct cfg80211_scan_info info = {
+                .aborted = true,
+        };
 
 	DBG_871X("==> "FUNC_ADPT_FMT" entry....\n", FUNC_ADPT_ARG(padapter));
 
@@ -1327,7 +1330,7 @@ static int rtw_suspend_free_assoc_resource(struct adapter *padapter)
 	rtw_free_network_queue(padapter, true);
 
 	if (check_fwstate(pmlmepriv, _FW_UNDER_SURVEY))
-		rtw_indicate_scan_done(padapter, 1);
+		rtw_indicate_scan_done(padapter, &info);
 
 	if (check_fwstate(pmlmepriv, _FW_UNDER_LINKING) == true)
 	{
@@ -1347,6 +1350,9 @@ int rtw_suspend_wow(struct adapter *padapter)
 	struct net_device *pnetdev = padapter->pnetdev;
 	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(padapter);
 	struct wowlan_ioctl_param poidparam;
+	struct cfg80211_scan_info info = {
+                .aborted = true,
+        };
 	int ret = _SUCCESS;
 
 	DBG_871X("==> "FUNC_ADPT_FMT" entry....\n", FUNC_ADPT_ARG(padapter));
@@ -1398,7 +1404,7 @@ int rtw_suspend_wow(struct adapter *padapter)
 		if (check_fwstate(pmlmepriv, _FW_UNDER_SURVEY) == true)
 		{
 			DBG_871X_LEVEL(_drv_always_, "%s: fw_under_survey\n", __func__);
-			rtw_indicate_scan_done(padapter, 1);
+			rtw_indicate_scan_done(padapter, &info);
 			clr_fwstate(pmlmepriv, _FW_UNDER_SURVEY);
 		}
 

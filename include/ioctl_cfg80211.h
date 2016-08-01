@@ -114,7 +114,7 @@ int rtw_cfg80211_check_bss(struct adapter *padapter);
 void rtw_cfg80211_ibss_indicate_connect(struct adapter *padapter);
 void rtw_cfg80211_indicate_connect(struct adapter *padapter);
 void rtw_cfg80211_indicate_disconnect(struct adapter *padapter);
-void rtw_cfg80211_indicate_scan_done(struct adapter *adapter, bool aborted);
+void rtw_cfg80211_indicate_scan_done(struct adapter *adapter, struct cfg80211_scan_info *info);
 
 void rtw_cfg80211_indicate_sta_assoc(struct adapter *padapter, u8 *pmgmt_frame, uint frame_len);
 void rtw_cfg80211_indicate_sta_disassoc(struct adapter *padapter, unsigned char *da, unsigned short reason);
